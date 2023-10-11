@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8885:8885"
-    command: bash -c "gunicorn config.wsgi:application --bind 0.0.0.0:8885 --timeout 600"
+    command: bash -c "gunicorn black_order_table.wsgi:application --bind 0.0.0.0:8885 --timeout 600"
     env_file:
       - .env.deploy
 

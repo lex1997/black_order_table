@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 
@@ -19,6 +21,21 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def orders_last_month(self):
+        today = timezone.now()
+        last_month_start = (today.replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)).replace(day=1)
+        last_month_end = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
+        orders = self.order_set.filter(order_date__range=[last_month_start, last_month_end])
+        return orders.count()
+
+    @property
+    def orders_current_month(self):
+        today = timezone.now()
+        current_month_start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        orders = self.order_set.filter(order_date__gte=current_month_start)
+        return orders.count()
+
 
 class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
@@ -26,13 +43,3 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Заказ товара '{self.product.name}' от {self.order_date}"
-
-    @classmethod
-    def orders_last_month(cls):
-        last_month = timezone.now() - timezone.timedelta(days=30)
-        return cls.objects.filter(order_date__gte=last_month).count()
-
-    @classmethod
-    def orders_current_month(cls):
-        current_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        return cls.objects.filter(order_date__gte=current_month).count()
