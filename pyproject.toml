@@ -2,13 +2,15 @@
 name = "venv"
 version = "0.1.0"
 description = "Сервис для отображения таблицы товаров"
-authors = ["т"]
+authors = ["alex_gnev"]
 license = "n"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "3.11"
 Django = "^4.2.6"
+psycopg2 = "^2.9.9"
+gunicorn = "^21.2.0"
 
 
 [build-system]

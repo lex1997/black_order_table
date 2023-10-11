@@ -1,0 +1,54 @@
+version: "3.7"
+services:
+  web:
+    container_name: black_order
+    restart: always
+    stdin_open: true
+    tty: true
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8885:8885"
+    command: bash -c "gunicorn config.wsgi:application --bind 0.0.0.0:8885 --timeout 600"
+    env_file:
+      - .env.deploy
+
+    volumes:
+      - ./:/src/
+      - static_volume:/src/config/static/
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: black_order_postgres
+    image: postgres:14.0
+    tmpfs:
+      - /mnt
+    command: >
+      -c work_mem=10GB
+      -c maintenance_work_mem=10GB
+      -c max_wal_size=2GB
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.deploy
+
+  nginx:
+    container_name: black_order_nginx
+    image: nginx
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/src/config/static/
+    ports:
+      - "8883:8883"
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  static_volume:
